@@ -1,0 +1,83 @@
+#include <SoftwareSerial.h>
+#include <stdlib.h>
+#include "StringSplitter.h"
+
+#define rxPin 2
+#define txPin 3
+
+int enA = 9;
+int in1 = 8;
+int in2 = 7;
+
+//int motorPin = 9;
+
+float data;
+// Set up a new SoftwareSerial object
+SoftwareSerial mySerial =  SoftwareSerial(rxPin, txPin);
+
+void setup() {
+  //Serial Begin at 9600 Baud 
+  Serial.begin(9600);
+  mySerial.begin(9600);
+  pinMode(enA, OUTPUT);
+  pinMode(in1, OUTPUT);
+  pinMode(in2, OUTPUT);
+}
+
+void loop() {
+  bool stringReady = false;
+  String str = "";
+  int value = 0;
+  while (mySerial.available()){
+    str = mySerial.readString(); //Read the serial data and store it
+    
+    stringReady = true;
+  }
+  if (stringReady) {
+    StringSplitter *splitter = new StringSplitter(str, '.', 1);
+    int itemCount = splitter->getItemCount();
+    if (itemCount > 0) {
+      String item = splitter->getItemAtIndex(0);
+      value = item.toInt();
+      
+      if (value < 130 && value > 30) {
+        value = map(value, 30, 130, 200, 250);
+        //analogWrite(motorPin, value);
+      }
+      else if (value < 30) {
+        value = 10;
+      }
+      else {
+        value = 250;;
+      }
+
+      
+    }
+//    MotorActive(value);
+
+    
+    //Serial.flush();
+  }
+
+  digitalWrite(in1, HIGH);
+  digitalWrite(in2, LOW);
+  analogWrite(enA, value);
+  Serial.println(value);
+
+  
+  delay(800);
+}
+
+//void MotorActive(int value){
+//    if (value < 130 && value > 30) {
+//      value = map(value, 30, 130, 50, 200);
+//      analogWrite(motorPin, value);
+//    }
+//    else if (value < 30) {
+//      analogWrite(motorPin, 10);
+//    }
+//    else {
+//      analogWrite(motorPin, 200);
+//    }
+//    delay(500);
+//}
